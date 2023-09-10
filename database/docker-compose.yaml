@@ -1,0 +1,23 @@
+# To create these containers run this:
+#   docker-compose up -d
+
+version: '3.1'
+
+services:
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - MYSQL_ROOT_PASSWORD=${ROOT_ACCESS_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE} 
+      - MYSQL_USER=${MYSQL_USER} 
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}  
+    volumes:
+      - ~/docker/mariadb/config:/config
+    ports:
+      - 3306:3306
+    restart: unless-stopped
