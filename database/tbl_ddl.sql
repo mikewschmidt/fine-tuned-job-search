@@ -8,7 +8,7 @@ CREATE TABLE APPUSER.tbl_jobs
      company         VARCHAR2 (50)  NOT NULL, 
      location        VARCHAR2 (100) NOT NULL, 
      job_title       VARCHAR2 (200) NOT NULL, 
-     job_description VARCHAR (4000) NOT NULL, 
+     job_description CLOB NOT NULL, 
      experience      VARCHAR2 (500) , 
      Seniority_level VARCHAR2 (20) , 
      Employment_type VARCHAR2 (20) , 
@@ -17,6 +17,8 @@ CREATE TABLE APPUSER.tbl_jobs
      posting_date    TIMESTAMP NOT NULL, 
      url             VARCHAR2 (100) NOT NULL
     ) 
+    TABLESPACE DATA 
+    LOGGING 
 ;
 
 
