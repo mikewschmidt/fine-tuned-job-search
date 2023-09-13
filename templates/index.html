@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{%block title %}Home Page{% endblock %}
+{% block content %}
+<header class="py-5">
+    <div class="container px-5 pb-5">
+        <div class="row gx-5 align-items-center">
+            <!-- WTF INPUT FORM   -->   
+            
+            {% from 'bootstrap5/form.html' import render_form %}
+            {{ form.csrf_token }}
+            {{ render_form(form, method='post',
+                            form_type='inline',
+                            horizontal_columns=('lg', 8, 4),
+                            button_size='sm')
+            }}
+            
+
+
+            
+            <!-- END WTF INPUT FORM --> 
+
+
+            <br /><br />
+            <form class="form-inline" method="POST">
+                {{ form.csrf_token }}  
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                    <div class="input-group-text">💼</div>
+                    </div>
+                    {{ form.in_jobtitle(size=30) }}
+                    
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">🌏︎</div>
+                    </div>
+                    {{ form.in_location }}
+                </div>
+                <div class="input-group">
+                    <label for="integerslider" class="form-label">Max Years</label>
+                    {{ form.integerslider }} 
+                    <output id="rangevalue">5</output>
+                    
+                </div>
+                <input type="submit" value="CLICK ME!">
+            </form>
+
+            <!-- INPUT FORM --> 
+            <form method = post class="form-inline">
+                    
+                <div class="input-group mb-2 mr-sm-2">
+                    <div class="input-group-prepend">
+                    <div class="input-group-text">💼</div>
+                    </div>
+                    <input type="text" class="form-control" id="inlineFormInputJobTitle" name="inlineFormInputJobTitle" placeholder="Job Title">
+                </div>
+                
+                <div class="input-group mb-2 mr-sm-2">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">🌏︎</div>
+                </div>
+                <input type="text" class="form-control" id="inlineFormInputLocation" name="inlineFormInputLocation" placeholder="Location">
+                </div>
+
+                <button type="submit" class="btn btn-primary mb-2">Submit</button>
+            </form>
+            <!-- END INPUT FORM -->
+        </div>
+    </div>
+</header>
+{% endblock %}

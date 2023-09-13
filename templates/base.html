@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            {{ bootstrap.load_css() }}
+        {% endblock %}
+
+
+        {% from 'bootstrap5/nav.html' import render_nav_item %}
+        <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+            <div class="container-fluid">
+            <!-- <div class="navbar-nav mr-auto"> 
+            -->
+                <div class="navbar-brand">{{ render_nav_item('index', '👎 Job Search Sucks! 👎 ') }}</div>
+                <div class="collapse navbar-collapse" id="navbarColor02">
+                    <ul class="navbar-nav me-auto">
+                        
+                        <a class="nav-link">{{ render_nav_item('stats', 'Stats') }}</a>
+                        {{ render_nav_item('about', 'About') }}
+                    </ul>
+                    
+                </div>
+
+            </div>
+        </nav>
+
+        <title>Job Search Sucks!</title>
+        {% endblock %}
+    </head>
+    <body class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <!-- Your page content -->
+            {% block content %}
+            {% endblock %}
+
+            {% block scripts %}
+                <!-- Optional JavaScript -->
+                {{ bootstrap.load_js() }}
+            {% endblock %}
+        </main>
+    </body>
+</html>

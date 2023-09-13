@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{%block title %}Home Page{% endblock %}
+{% block content %}
+    <h2>Searching {{ title }} in {{ location }} max years of experience {{ max_years }}</h2>
+
+    
+    <div class="card container text_center">
+        
+        {% for job in job_list %}
+            <div class="card-header">{{ job.company }}</div>
+            <div class="card-body">
+                {{ job.job_id }}
+                <h5 class="card-title">{{ job.job_title }}</h5>
+                {{ job.location }}
+                <i class="bi bi-box2-heart"></i>
+                <i class="bi bi-building"></i>
+                <p class="card-text">{{ job.experience }}</p>
+                <p class="card-text text-truncate"><small>{{ job.job_description }}</small></p>
+                <a href="{{ job.url }}" class="btn btn-primary">Apply</a>
+                <p class="card-text">
+                    <div class="container">
+                        
+                        <div class="row">
+                            <div class="col">{{ job.seniority_level }}</div>
+                            <div class="col">{{ job.employment_type }}</div>
+                            <div class="col">{{ job.job_function }}</div>
+                            <div class="col">{{ job.industries }}</div>
+                        </div>
+                    </div>
+                </p>
+            </div>
+            <div class="card-footer text-muted">Estimated post: {{ job.posting_date }}</div>  
+            <br/><hr><br/>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}
