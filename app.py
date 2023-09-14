@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_bootstrap import Bootstrap5, Bootstrap4
 from flask_wtf import FlaskForm, CSRFProtect
-from wtforms import SubmitField, StringField, PasswordField, IntegerRangeField, SelectField
+from wtforms import SubmitField, StringField, PasswordField, IntegerRangeField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, length
 import pandas as pd
+import scraper
 import db
 
 
@@ -13,6 +14,8 @@ app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'cosmo'
 
 bootstrap = Bootstrap5(app)
 formData = {}
+
+# WTForm class
 
 
 class SearchForm(FlaskForm):
@@ -24,23 +27,24 @@ class SearchForm(FlaskForm):
                               render_kw={"placeholder": "Location"})
     # integerslider = IntegerRangeField(render_kw={'min': '1', 'max': '10'})
     max_years = SelectField('Max Years', choices=[1, 2, 3, 4, 5])
+    job_count = HiddenField('')
     submit_btn = SubmitField('Submit')
 
 
-# Variables that should probably be taken from user input on webpage
-# title = "Data Engineer"
-# location = "Chicago, IL"
-
-
-@app.route('/', methods=['Post', 'Get'])
+@app.route('/', methods=['POST', 'GET'])
 def index():
     form = SearchForm()
     if form.validate_on_submit():
+        print("FORM HAS BEEN VALIDATED!!")
         title = form.in_jobtitle.data
         location = form.in_location.data
         max_years = form.max_years.data
-        jobs = db.query_db(title, location)
-        return render_template('results.html', job_list=jobs, title=title, location=location, max_years=max_years)
+        job_count = 0
+        # jobs = db.query_db(title, location)  # Direct query on database
+        # print("Length of jobs: ", len(jobs))
+        jobs = scraper.get_job_results_for_website(
+            title, location, max_years=3, job_count=job_count)
+        return render_template('results.html', job_list=jobs, title=title, location=location, max_years=max_years, job_count=job_count, form=form)
     else:
         return render_template('index.html', form=form)
 
@@ -54,14 +58,19 @@ def index():
     return render_template("index.html", job_list=jobs)
 
 
-@app.route('/results')
+@app.route('/results', methods=["POST", "GET"])
 def results():
-    return render_template('results.html', title=formData['title'], location=formData['location'])
+
+    # if request.method == 'POST':
+    #    if request.form.get('back')
+    # return render_template('results.html', title=formData['title'], location=formData['location'])
+    return render_template('results.html')
 
 
 @app.route('/stats')
 def stats():
-    return render_template("stats.html")
+    form = SearchForm()
+    return render_template("stats.html", form=form)
 
 
 @app.route('/about')

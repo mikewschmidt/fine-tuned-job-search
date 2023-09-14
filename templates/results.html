@@ -1,12 +1,11 @@
 {% extends "base.html" %}
-{%block title %}Home Page{% endblock %}
-{% block content %}
-    <h2>Searching {{ title }} in {{ location }} max years of experience {{ max_years }}</h2>
 
+{% block content %}
+    <h2>Searching {{ title }} in {{ location }} max years of experience {{ max_years }}. Job Count: {{ job_count }}</h2>
     
     <div class="card container text_center">
-        
         {% for job in job_list %}
+        
             <div class="card-header">{{ job.company }}</div>
             <div class="card-body">
                 {{ job.job_id }}
@@ -16,7 +15,7 @@
                 <i class="bi bi-building"></i>
                 <p class="card-text">{{ job.experience }}</p>
                 <p class="card-text text-truncate"><small>{{ job.job_description }}</small></p>
-                <a href="{{ job.url }}" class="btn btn-primary">Apply</a>
+                <a href="{{ job.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Apply</a>
                 <p class="card-text">
                     <div class="container">
                         
@@ -31,8 +30,16 @@
             </div>
             <div class="card-footer text-muted">Estimated post: {{ job.posting_date }}</div>  
             <br/><hr><br/>
+        
         {% endfor %}
     </div>
+    <div class="container px-5 pb-5">
+        <form class="text_center" method="POST">
+            <button type="button" name="back" class="btn btn-primary btn-lg"><<<  BACK </button>
+            <button type="button" name="next" class="btn btn-primary btn-lg">NEXT  >>></button>
+        </form>
+    </div>
+
 
 
 {% endblock %}
