@@ -20,7 +20,7 @@ formData = {}
 
 class SearchForm(FlaskForm):
     in_jobtitle = StringField('Job Title',
-                              validators=[DataRequired(), length(min=4)],
+                              validators=[DataRequired(), length(min=3)],
                               render_kw={"placeholder": "Job Title"})
     in_location = StringField('Location',
                               validators=[DataRequired(), length(min=4)],
@@ -43,7 +43,7 @@ def index():
         # jobs = db.query_db(title, location)  # Direct query on database
         # print("Length of jobs: ", len(jobs))
         jobs = scraper.get_job_results_for_website(
-            title, location, max_years=3, job_count=job_count)
+            title, location, max_years=max_years, job_count=job_count)
         return render_template('results.html', job_list=jobs, title=title, location=location, max_years=max_years, job_count=job_count, form=form)
     else:
         return render_template('index.html', form=form)

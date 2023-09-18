@@ -115,7 +115,7 @@ def get_job_ids(title, location, job_count):
 def get_all_job_ids(title, location):
     all_job_ids = []
     job_count = 0
-    max_jobs_to_scrape = 200
+    max_jobs_to_scrape = 700
     # I can't get a job_count for the search query,
     # so going to scrape till it can NOT find any more job ids
     # or I'm going to scrape upto 300 jobs or 12 pages
@@ -136,7 +136,7 @@ def get_all_job_ids(title, location):
 def split_job_ids(job_ids: list) -> tuple:
     # Convert to set to remove duplicates, convert string job ids
     # to ints and convert to numpy array
-    job_ids = np.array(list(set(job_ids))).astype('int64')
+    job_ids = np.array(list(filter(None, set(job_ids)))).astype('int64')
     # Jobs ids that exist in the database (or being tracked by tracking_all_job_ids)
     job_ids_for_db = job_ids[np.in1d(job_ids, tracking_all_job_ids)]
     # Filter out job ids already in the database
@@ -162,6 +162,7 @@ def get_job_details_linkedin(title, location, job_ids):
 
     job_url = 'https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{}'
     l_all_job_info = []
+    sleep_increment = 0
 
     for id in job_ids:
         d_job_info = {}
@@ -179,71 +180,97 @@ def get_job_details_linkedin(title, location, job_ids):
             continue
         else:
             # Putting in a 2 second delay for scraping
-            time.sleep(2)
+            time.sleep(1+sleep_increment)
+            sleep_increment += 0.05
 
         # Get the company name
         try:
             d_job_info["company"] = soup.find(
                 "div", {"class": "top-card-layout__card"}).find("a").find("img").get("alt")
         except:
-            pass
+            d_job_info["company"] = None
 
         # Get the location
-        d_job_info["location"] = soup.find("div", {"class": "topcard__flavor-row"}).find(
-            "span", {"class": "topcard__flavor--bullet"}).text.strip()
+        try:
+            d_job_info["location"] = soup.find("div", {"class": "topcard__flavor-row"}).find(
+                "span", {"class": "topcard__flavor--bullet"}).text.strip()
+        except:
+            d_job_info["location"] = ''
 
         # Get the job title
-        d_job_info["job_title"] = soup.find(
-            "h2", {"class": "top-card-layout__title"}).text.strip()
+        try:
+            d_job_info["job_title"] = soup.find(
+                "h2", {"class": "top-card-layout__title"}).text.strip()
+        except:
+            d_job_info["job_title"] = ''
 
         # Get the full job description
-        d_job_info["job_description"] = soup.find(
-            "div", {"class": "show-more-less-html__markup"}).get_text(separator=u"\n")
+        try:
+            d_job_info["job_description"] = soup.find(
+                "div", {"class": "show-more-less-html__markup"}).get_text(separator=u"\n")
+        except:
+            d_job_info["job_description"] = ''
 
         # Get years of experience!!! Keep checking this as it may be buggy
-        d_job_info["experience"] = re.findall(
-            r".*\D\d{1,2}\D.*years?", d_job_info["job_description"])
-        d_job_info["experience"] = "\n".join(d_job_info["experience"])
+        try:
+            d_job_info["experience"] = re.findall(
+                # r".*\D\d{1,2}\D.*years?", d_job_info["job_description"])
+                r".*\D\d{1,2}\D*(?:years?|yrs)", d_job_info["job_description"])
+            d_job_info["experience"] = "\n".join(d_job_info["experience"])
+        except:
+            d_job_info["experience"] = None
 
         # Get the max years experience
         if d_job_info["experience"]:
-            d_job_info['max_exp'] = max(re.findall(
-                r'\d+', d_job_info["experience"]))
+            print(d_job_info["experience"])
+            d_job_info['max_exp'] = max(
+                np.array(
+                    re.findall(r'\d+', d_job_info["experience"]), dtype=int))
 
         # Get Seniority level, Employment type, Job function, Industries
-        job_criteria_list = soup.find(
-            "ul", {"class": "description__job-criteria-list"}).find_all("li")
-        for criteria in job_criteria_list:
-            criteria = criteria.text.split("\n")  # convert lines to a list
-            # remove lines with only white space
-            criteria = [i.strip() for i in criteria if i.strip()]
-            criteria[0] = criteria[0].replace(" ", "_").lower()
-            d_job_info.update({criteria[0]: criteria[1]})
+        try:
+            job_criteria_list = soup.find(
+                "ul", {"class": "description__job-criteria-list"}).find_all("li")
+            for criteria in job_criteria_list:
+                criteria = criteria.text.split("\n")  # convert lines to a list
+                # remove lines with only white space
+                criteria = [i.strip() for i in criteria if i.strip()]
+                criteria[0] = criteria[0].replace(" ", "_").lower()
+                d_job_info.update({criteria[0]: criteria[1]})
+        except:
+            pass
 
         # Get job posting date
-        posting_date = soup.find(
-            "span", {"class": "posted-time-ago__text"}).text.strip()
-        posting_num = int(re.match(r'\d{1,2}', posting_date).group())
-        if "minute" in posting_date:
-            d_job_info["posting_date"] = datetime.today() - \
-                timedelta(minutes=posting_num)
-        elif "hour" in posting_date:
-            d_job_info["posting_date"] = datetime.today() - \
-                timedelta(hours=posting_num)
-        elif "day" in posting_date:
-            d_job_info["posting_date"] = datetime.today() - \
-                timedelta(days=posting_num)
-        elif "week" in posting_date:
-            d_job_info["posting_date"] = datetime.today() - \
-                timedelta(days=posting_num*7)
-        else:
-            d_job_info["posting_date"] = ""
+        try:
+            posting_date = soup.find(
+                "span", {"class": "posted-time-ago__text"}).text.strip()
+            posting_num = int(re.match(r'\d{1,2}', posting_date).group())
+            if "minute" in posting_date:
+                d_job_info["posting_date"] = datetime.today() - \
+                    timedelta(minutes=posting_num)
+            elif "hour" in posting_date:
+                d_job_info["posting_date"] = datetime.today() - \
+                    timedelta(hours=posting_num)
+            elif "day" in posting_date:
+                d_job_info["posting_date"] = datetime.today() - \
+                    timedelta(days=posting_num)
+            elif "week" in posting_date:
+                d_job_info["posting_date"] = datetime.today() - \
+                    timedelta(days=posting_num*7)
+            else:
+                d_job_info["posting_date"] = ""
+
+        except:
+            d_job_info["posting_date"] = ''
 
         # !!! Get Other useful info with AI !!!
 
         # Get URL
-        d_job_info["url"] = soup.find(
-            "a", {"class": "topcard__link"}).get("href")
+        try:
+            d_job_info["url"] = soup.find(
+                "a", {"class": "topcard__link"}).get("href")
+        except:
+            d_job_info["url"] = None
 
         # Append the job info (dict) to the list of job info
         l_all_job_info.append(d_job_info)

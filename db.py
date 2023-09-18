@@ -27,23 +27,33 @@ def query_db(title, location) -> list:
     title = title.replace(" ", "%")
     with engine.connect() as conn:
         df_results = pd.read_sql_query(
-            f"SELECT * FROM tbl_jobs WHERE lower(job_title) like '%{title.lower()}%' AND lower(location) like '%{location.lower()}%'", conn)
+            f"""SELECT * 
+            FROM tbl_jobs 
+            WHERE lower(job_title) like '%{title.lower()}%' 
+            AND lower(location) like '%{location.lower()}%'
+            ORDER BY posting_date DESC""", conn)
         # results = conn.execute(text(f"SELECT * FROM tbl_jobs WHERE job_title like '%{title}%' AND location like '%{location}%'"))
         results = df_results.to_dict("records")
     return results
 
 
 # Query database by id
-def query_db_by_id(job_ids: np.ndarray, max_years) -> pd.DataFrame:
+def query_db_by_id(job_ids: np.ndarray, max_years: int) -> pd.DataFrame:
     # Convert it into a tuple or if there is 1 job ID, then just get that
     if len(job_ids) == 1:
         job_ids = f"({job_ids[0]})"
     else:
         job_ids = tuple(job_ids)
 
+    print("MAX YEARS: ", max_years)
+
     with engine.connect() as conn:
         df_results = pd.read_sql_query(
-            f"SELECT * FROM tbl_jobs WHERE job_id in {job_ids} AND max_exp <= {max_years}", conn)
+            f"""SELECT * 
+            FROM tbl_jobs 
+            WHERE job_id in {job_ids} 
+            AND max_exp <= {max_years} 
+            ORDER BY posting_date DESC""", conn)
     return df_results
 
 # Get all the job IDs in the database, to keep it in RAM
