@@ -12,11 +12,11 @@ from sqlalchemy import create_engine
 
 
 # Setting variables and creating the connection engine
-cs = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.us-sanjose-1.oraclecloud.com))(connect_data=(service_name=ga3e236c6957ba6_oltpdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
+conn_str = '''(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.us-sanjose-1.oraclecloud.com))(connect_data=(service_name=ga3e236c6957ba6_oltpdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'''
 user = "appuser"
 password = os.environ['ORACLE_PASSWORD_APPUSER']
 engine = create_engine(
-    f'oracle+oracledb://{user}:{password}@{cs}'
+    f'oracle+oracledb://{user}:{password}@{conn_str}'
 )
 
 
@@ -88,6 +88,6 @@ def get_job_details_db(job_ids: np.ndarray) -> pd.DataFrame:
 
 
 def insert_job_detail_into_db(df_job_info: pd.DataFrame):
-    if np.any(df_job_info):
+    if isinstance(df_job_info, pd.DataFrame) and not df_job_info.empty:
         df_job_info.to_sql('tbl_jobs', engine, 'appuser',
                            if_exists='append', index=False, method=None)
