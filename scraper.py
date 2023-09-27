@@ -156,8 +156,8 @@ def string_format(s: str) -> str:
     return s
 
 
-def get_job_details_linkedin(title, location, job_ids):
-    if not np.any(job_ids):  # No job_ids
+def get_job_details_linkedin(title, location, job_ids: list):
+    if isinstance(job_ids, list) and not job_ids:  # No job_ids
         return pd.DataFrame()
 
     job_url = 'https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{}'
@@ -222,10 +222,9 @@ def get_job_details_linkedin(title, location, job_ids):
 
         # Get the max years experience
         if d_job_info["experience"]:
-            print(d_job_info["experience"])
+            # print(d_job_info["experience"])
             d_job_info['max_exp'] = max(
-                np.array(
-                    re.findall(r'\d+', d_job_info["experience"]), dtype=int))
+                list(map(int, re.findall(r'\d+', d_job_info["experience"]))))
 
         # Get Seniority level, Employment type, Job function, Industries
         try:
