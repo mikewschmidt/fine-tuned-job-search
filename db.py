@@ -123,5 +123,7 @@ def query_aws_db_by_id(job_ids: np.ndarray, max_years: int) -> list:
             max_exp = response["Item"].get("max_exp", 0)
             if max_exp and max_exp <= max_years:
                 l_all_job_details.append(response["Item"])
+        else:
+            print("No db Response!! for job_id: ", id)
 
     return l_all_job_details
