@@ -9,7 +9,7 @@ from db import *
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'KMHKQa!3seZ^PShQg!m@QPhWkYCSrKr2hG_WQ8nq=@w4_n6x#C$aSE=6$BVB_$G*S_#YaGE=sJLrLn*=CRQS!r_sjxhd%XquM8KJQ9BYw4&Up$XeMHw^MYH&2#YT*ayFuzKtvg@M?3y6$R*U#_k&_dE!286!6reds#2aRHq%nPy2v__Vp9Cx#eb%^eq&5?fpzt8GaUh=a9_b5w%4UwU%Rz*6LV7TG4jVU_mqHSKLhRB-yyxmLTvwntUye&r-@J$3'
+app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
 app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'cosmo'
 
 bootstrap = Bootstrap5(app)
