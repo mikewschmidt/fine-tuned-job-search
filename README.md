@@ -13,7 +13,7 @@ With a click of a button, you can uncover your dream job and start making stride
 ## Architecture
 ![Fine-Tuned Job Search diagram](https://github.com/mikewschmidt/fine-tuned-job-search/blob/master/templates/fine-tuned-job-search.drawio.png "Fine-Tuned Job Search diagram")
 
-When submitting a job search, the app submits a more targeted search on the large job search website. Scrapes the job IDs on all the jobs and pushes them to the SQS queue. Then a Lambda trigger executes the code to scrape the job details and writes it to the DynamoDB database.
+When submitting a job search, the app submits a more targeted search on the large job search website. Scrapes the job IDs from the resultset and pushes them to the SQS queue. Then a Lambda trigger executes the code to scrape the job details and writes it to the DynamoDB database.
 
 
 ## Technologies
