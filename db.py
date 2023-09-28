@@ -119,8 +119,9 @@ def query_aws_db_by_id(job_ids: np.ndarray, max_years: int) -> list:
     for id in job_ids:
         response = table.get_item(Key={"job_id": int(id)})
         # Future Mike, maybe you should filter this out at the db layer
-        max_exp = response.get("Item", None).get("max_exp", 0)
-        if max_exp and max_exp <= max_years:
-            l_all_job_details.append(response["Item"])
+        if response:
+            max_exp = response["Item"].get("max_exp", 0)
+            if max_exp and max_exp <= max_years:
+                l_all_job_details.append(response["Item"])
 
     return l_all_job_details
