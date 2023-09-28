@@ -15,6 +15,8 @@ With a click of a button, you can uncover your dream job and start making stride
 
 When submitting a job search, the app submits a more targeted search on the large job search website. Scrapes the job IDs from the resultset and pushes them to the SQS queue. Then a Lambda trigger executes the code to scrape the job details and writes it to the DynamoDB database.
 
+As mentioned, this is a work in progress; the next steps will be a user login and job tracking.
+
 
 ## Technologies
 The technologies used in this project:
