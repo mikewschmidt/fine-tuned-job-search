@@ -89,7 +89,7 @@ def about():
 # def data():
 #    return render_template('data_engineer_San_Jose,_California,_United_States.html')
 if __name__ == '__main__':
-    port = input("Which port do you want to run on?")
+    port = input("Which port do you want to run on?  ")
     if not port.isdigit() or not isinstance(port, int):
         port=5000
     app.run(host='0.0.0.0', port=port, debug=True)
