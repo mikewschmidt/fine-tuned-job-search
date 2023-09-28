@@ -12,20 +12,21 @@ import os
 import oracledb
 from sqlalchemy import create_engine, text
 from flask import Flask, render_template
-import db
+from db import *
 import time
 import numpy as np
 
 
-tracking_all_job_ids = db.get_all_job_ids()
+# tracking_all_job_ids = get_all_job_ids_db()
 
 
 def get_job_results_for_website(title, location, max_years=3, job_count=0):
     ''' This function calls all the other functions to get the job info
         from LinkedIn and the database.'''
 
+    ### FUTURE Mike! Maybe cache ALL the job ids from the database into RAM ###
     global tracking_all_job_ids
-    tracking_all_job_ids = db.get_all_job_ids()
+    tracking_all_job_ids = get_all_job_ids_db()
 
     # Scrape 1 page of LinkedIn job IDs
     # job_ids = get_job_ids(title, location, job_count)
@@ -38,6 +39,9 @@ def get_job_results_for_website(title, location, max_years=3, job_count=0):
         f"IDs for db: {len(job_ids_for_db)}   |  IDs for linkedin: {len(job_ids_for_linkedin)}")
     print("Job IDs for the database: ", job_ids_for_db)
     print("Job IDs for LinkedIn scraping: ", job_ids_for_linkedin)
+
+    # Insert job IDs into AWS ETL pipeline: SQS-->Lambda-->DynamoDB
+    push_job_ids_to_aws(job_ids_for_linkedin)
 
     # Get job details from the database
     # df_job_details_db = db.get_job_details_db(job_ids_for_db)
@@ -52,11 +56,11 @@ def get_job_results_for_website(title, location, max_years=3, job_count=0):
         print(f"# of details from linkedin: {len(df_job_details_linkedin)}")
 
     # Insert scraped LinkedIn job details into the database
-    db.insert_job_detail_into_db(df_job_details_linkedin)
+    insert_job_detail_into_db(df_job_details_linkedin)
 
     # Add LinkedIn job IDs to the tracking variable
-    tracking_all_job_ids = np.append(
-        job_ids_for_linkedin, tracking_all_job_ids)
+    ### I am NOT caching the job IDs locally, I'm hitting the database on every web request ###
+    # tracking_all_job_ids = np.append(job_ids_for_linkedin, tracking_all_job_ids)
 
     # Converted all the job IDs to a numpy array so I can query it. (Used set() to dedup)
     # job_ids = np.array(list(filter(None, set(job_ids))))
@@ -64,9 +68,16 @@ def get_job_results_for_website(title, location, max_years=3, job_count=0):
 
     # df_all_job_details = pd.concat([df_job_details_db, df_job_details_linkedin])
     # Now I'm pulling all the job details from the database
-    df_all_job_details = db.query_db_by_id(job_ids, max_years)
+    df_all_job_details = query_db_by_id(job_ids, max_years)
+    # Query DynamoDB for the job_ids
+    l_all_job_details = query_aws_db_by_id(job_ids, max_years)
 
-    return df_all_job_details.to_dict("records")
+    print("### HERE IS THE LIST OF DICTIONARIES FROM DYNAMODB ###")
+    for j in l_all_job_details:
+        print(j)
+
+    # return df_all_job_details.to_dict("records")
+    return l_all_job_details
 
 # Sends a request for one page of results to LinkedIn to get a list of job titles
 # I do NOT call this function directly, I call get_job_ids, which calls this function
@@ -115,7 +126,7 @@ def get_job_ids(title, location, job_count):
 def get_all_job_ids(title, location):
     all_job_ids = []
     job_count = 0
-    max_jobs_to_scrape = 700
+    max_jobs_to_scrape = 100
     # I can't get a job_count for the search query,
     # so going to scrape till it can NOT find any more job ids
     # or I'm going to scrape upto 300 jobs or 12 pages

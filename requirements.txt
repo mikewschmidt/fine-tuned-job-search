@@ -6,3 +6,4 @@ sqlalchemy
 flask
 bootstrap-flask
 flask_wtf
+boto3

@@ -4,8 +4,8 @@ from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import SubmitField, StringField, PasswordField, IntegerRangeField, SelectField, IntegerField, HiddenField
 from wtforms.validators import DataRequired, length
 import pandas as pd
-import scraper
-import db
+from scraper import *
+from db import *
 
 
 app = Flask(__name__)
@@ -26,7 +26,8 @@ class SearchForm(FlaskForm):
                               validators=[DataRequired(), length(min=4)],
                               render_kw={"placeholder": "Location"})
     # integerslider = IntegerRangeField(render_kw={'min': '1', 'max': '10'})
-    max_years = SelectField('Max Years', choices=[1, 2, 3, 4, 5])
+    max_years = SelectField('Max Years', choices=[(1, '<= 1 year'),
+                                                  (2, '<= 2 years'), (3, '<= 3 years'), (4, '<= 4 years'), (5, '<= 5 years')])
     job_count = HiddenField('')
     submit_btn = SubmitField('Submit')
 
@@ -38,11 +39,11 @@ def index():
         print("FORM HAS BEEN VALIDATED!!")
         title = form.in_jobtitle.data
         location = form.in_location.data
-        max_years = form.max_years.data
+        max_years = int(form.max_years.data)
         job_count = 0
         # jobs = db.query_db(title, location)  # Direct query on database
         # print("Length of jobs: ", len(jobs))
-        jobs = scraper.get_job_results_for_website(
+        jobs = get_job_results_for_website(
             title, location, max_years=max_years, job_count=job_count)
         return render_template('results.html', job_list=jobs, title=title, location=location, max_years=max_years, job_count=job_count, form=form)
     else:

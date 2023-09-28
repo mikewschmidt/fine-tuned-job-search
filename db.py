@@ -9,6 +9,7 @@ import re
 import os
 import oracledb
 from sqlalchemy import create_engine
+import boto3
 
 
 # Setting variables and creating the connection engine
@@ -56,10 +57,11 @@ def query_db_by_id(job_ids: np.ndarray, max_years: int) -> pd.DataFrame:
             ORDER BY posting_date DESC""", conn)
     return df_results
 
+
 # Get all the job IDs in the database, to keep it in RAM
 
 
-def get_all_job_ids():
+def get_all_job_ids_db():
     with engine.connect() as conn:
         tracking_all_job_ids = pd.read_sql_query(
             f'SELECT job_id FROM tbl_jobs', conn)
@@ -85,9 +87,40 @@ def get_job_details_db(job_ids: np.ndarray) -> pd.DataFrame:
 
 
 # Insert scraped Linkedin into the database
-
-
 def insert_job_detail_into_db(df_job_info: pd.DataFrame):
     if isinstance(df_job_info, pd.DataFrame) and not df_job_info.empty:
         df_job_info.to_sql('tbl_jobs', engine, 'appuser',
                            if_exists='append', index=False, method=None)
+
+
+# Insert job ids into AWS ETL:  SQS --> Lambda --> DynamoDB
+def push_job_ids_to_aws(job_ids: list):
+    client = boto3.resource('sqs',
+                            endpoint_url='https://sqs.us-east-2.amazonaws.com/762907089775/job_ids',
+                            region_name='us-east-2',
+                            aws_access_key_id=os.environ['WEBAPP_AWS_ACCESS_KEY_ID'],
+                            aws_secret_access_key=os.environ['WEBAPP_AWS_SECRET_ACCESS_KEY'])
+
+    queue = client.get_queue_by_name(QueueName='job_ids')
+    for id in job_ids:
+        response = queue.send_message(MessageBody=f'{id}')
+
+
+# Query DynamoDB by id
+
+
+def query_aws_db_by_id(job_ids: np.ndarray, max_years: int) -> list:
+    # Create the DynamoDB table object
+    l_all_job_details = []
+    dynamodb = boto3.resource('dynamodb', region_name="us-east-2",
+                              aws_access_key_id=os.environ['WEBAPP_AWS_ACCESS_KEY_ID'],
+                              aws_secret_access_key=os.environ['WEBAPP_AWS_SECRET_ACCESS_KEY'])
+    table = dynamodb.Table("linkedin_jobs")
+    for id in job_ids:
+        response = table.get_item(Key={"job_id": int(id)})
+        # Future Mike, maybe you should filter this out at the db layer
+        max_exp = response["Item"].get("max_exp", 0)
+        if max_exp and max_exp <= max_years:
+            l_all_job_details.append(response["Item"])
+
+    return l_all_job_details
