@@ -16,8 +16,11 @@ With a click of a button, you can uncover your dream job and start making stride
 The technologies used in this project:
 - AWS SQS (Simple Queue Service)
 - AWS Lambda
-  - Python ETL
-    - Beautiful Soup (Web Scraping)
-- AWS DynamoDB (database)
+- AWS DynamoDB (NoSQL database)
 - Oracle Cloud Compute
   - Flask framework (front-end)
+- Python ETL
+  - Beautiful Soup (Web Scraping)
+  - Pandas
+  - urllib
+  - Boto3
