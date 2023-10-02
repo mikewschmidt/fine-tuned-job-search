@@ -28,12 +28,10 @@ def get_job_results_for_website(title, location, max_years=3, job_count=0):
     global tracking_all_job_ids
     tracking_all_job_ids = get_all_job_ids_db()
 
-    # Scrape 1 page of LinkedIn job IDs
-    # job_ids = get_job_ids(title, location, job_count)
-    # Changing to Scrape ALL pages of LinkedIn for job IDs
+    # Scrape ALL pages of LinkedIn for job IDs
     job_ids = get_all_job_ids(title, location)
 
-    # Split job IDs, if they are in the database or needed to scrape job details
+    # Split job IDs, either they are in the database or need to scrape job details
     job_ids_for_db, job_ids_for_linkedin = split_job_ids(job_ids)
     print(
         f"IDs for db: {len(job_ids_for_db)}   |  IDs for linkedin: {len(job_ids_for_linkedin)}")
@@ -43,38 +41,47 @@ def get_job_results_for_website(title, location, max_years=3, job_count=0):
     # Insert job IDs into AWS ETL pipeline: SQS-->Lambda-->DynamoDB
     push_job_ids_to_aws(job_ids_for_linkedin)
 
+    ### REMOVING: NO LONGER QUERYING DB BEFORE SCRAPING. SCRAPING>INSERT INTO DB>QUERY ALL JOB IDS
     # Get job details from the database
     # df_job_details_db = db.get_job_details_db(job_ids_for_db)
 
+    ### REMOVING THIS SECTION BECAUSE THE AWS ETL IS HANDLING THE JOB DETAILS SCRAPING
     # Scrape job details from LinkedIn.
     # Need the title and location to save into the database, maybe need it
-    df_job_details_linkedin = get_job_details_linkedin(title, location,
-                                                       job_ids_for_linkedin)
+    #df_job_details_linkedin = get_job_details_linkedin(title, location, job_ids_for_linkedin)
     # if not df_job_details_db.empty:
     #    print(f"# of details from db: {len(df_job_details_db)}")
-    if not df_job_details_linkedin.empty:
-        print(f"# of details from linkedin: {len(df_job_details_linkedin)}")
+    #if not df_job_details_linkedin.empty:
+    #    print(f"# of details from linkedin: {len(df_job_details_linkedin)}")
 
+    ### REMOVING: NO LONGER INSERTING INTO ORACLE DATABASE
     # Insert scraped LinkedIn job details into the database
-    insert_job_detail_into_db(df_job_details_linkedin)
+    #insert_job_detail_into_db(df_job_details_linkedin)
 
     # Add LinkedIn job IDs to the tracking variable
     ### I am NOT caching the job IDs locally, I'm hitting the database on every web request ###
     # tracking_all_job_ids = np.append(job_ids_for_linkedin, tracking_all_job_ids)
 
+    ### REMOVED
     # Converted all the job IDs to a numpy array so I can query it. (Used set() to dedup)
     # job_ids = np.array(list(filter(None, set(job_ids))))
+    
+    ### NOT SURE IF I NEED TO CONCAT ALL THE JOB IDs, JUST USE the variable:  job_ids
+    ### DOES THIS NEED TO BE A NUMPY ARRAY???
     jobs_ids = np.concatenate([job_ids_for_db, job_ids_for_linkedin])
 
+    ### REMOVED: NO LONGER QUERYING ORACLE DATABASE
     # df_all_job_details = pd.concat([df_job_details_db, df_job_details_linkedin])
     # Now I'm pulling all the job details from the database
-    df_all_job_details = query_db_by_id(job_ids, max_years)
+    #df_all_job_details = query_db_by_id(job_ids, max_years)
+
     # Query DynamoDB for the job_ids
     l_all_job_details = query_aws_db_by_id(job_ids, max_years)
 
-    print("### HERE IS THE LIST OF DICTIONARIES FROM DYNAMODB ###")
-    for j in l_all_job_details:
-        print(j)
+    ### DEBUGGING
+    #print("### HERE IS THE LIST OF DICTIONARIES FROM DYNAMODB ###")
+    #for j in l_all_job_details:
+    #    print(j)
 
     # return df_all_job_details.to_dict("records")
     return l_all_job_details
@@ -126,7 +133,7 @@ def get_job_ids(title, location, job_count):
 def get_all_job_ids(title, location):
     all_job_ids = []
     job_count = 0
-    max_jobs_to_scrape = 100
+    max_jobs_to_scrape = 200
     # I can't get a job_count for the search query,
     # so going to scrape till it can NOT find any more job ids
     # or I'm going to scrape upto 300 jobs or 12 pages
