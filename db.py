@@ -62,10 +62,20 @@ def query_db_by_id(job_ids: np.ndarray, max_years: int) -> pd.DataFrame:
 
 
 def get_all_job_ids_db():
-    with engine.connect() as conn:
-        tracking_all_job_ids = pd.read_sql_query(
-            f'SELECT job_id FROM tbl_jobs', conn)
-    return tracking_all_job_ids.to_numpy()
+    
+    dynamodb = boto3.resource('dynamodb', region_name="us-east-2",
+                                aws_access_key_id=os.environ['WEBAPP_AWS_ACCESS_KEY_ID'],
+                                aws_secret_access_key=os.environ['WEBAPP_AWS_SECRET_ACCESS_KEY'])
+    table = dynamodb.Table("linkedin_jobs")
+
+    response = table.scan(AttributesToGet=['job_id'])
+    tracking_all_job_ids = [int(id['job_id']) for id in response['Items']]
+    tracking_all_job_ids = np.array(tracking_all_job_ids)
+    
+    #with engine.connect() as conn:
+    #    tracking_all_job_ids = pd.read_sql_query(
+    #        f'SELECT job_id FROM tbl_jobs', conn)
+    return tracking_all_job_ids
 
 
 # Get job details in the database by job IDs
