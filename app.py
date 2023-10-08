@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Email, length
 import pandas as pd
 from scraper import *
 from db import *
-from flask_login import LoginManager, UserMixin
+#from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_dance.contrib.google import make_google_blueprint, google
 
@@ -48,7 +48,7 @@ class SearchForm(FlaskForm):
 
 @app.route('/<path:path>')
 def send_report(path):
-    return send_from_directory('templates', path) 
+    return send_from_directory('templates', path)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -76,7 +76,8 @@ def index():
     # return render_template("index.html", tables=[df_jobs.to_html(classes='card')], titles=df_jobs.columns.values)
     return render_template("index.html", job_list=jobs)
 
-'''
+
+
 @app.route('/welcome')
 def welcome():
     resp = google.get("/oauth2/v2/userinfo")
@@ -94,7 +95,7 @@ def login():
     email=resp.json()["email"]
 
     return render_template('welcome.html', email=email)
-'''
+
 
 @app.route('/results', methods=["POST", "GET"])
 def results():
