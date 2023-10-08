@@ -48,6 +48,9 @@ class SearchForm(FlaskForm):
     job_count = HiddenField('')
     submit_btn = SubmitField('Submit')
 
+@app.route('/<path:path>')
+def send_report(path):
+    return send_from_directory('templates', path) 
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
