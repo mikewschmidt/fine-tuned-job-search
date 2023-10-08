@@ -103,7 +103,7 @@ def insert_job_detail_into_db(df_job_info: pd.DataFrame):
                            if_exists='append', index=False, method=None)
 
 
-# Insert job ids into AWS ETL:  SQS --> Lambda --> DynamoDB
+# Scrape and Insert job details into AWS ETL:  SQS --> Lambda --> DynamoDB
 def push_job_ids_to_aws(job_ids: list):
     client = boto3.resource('sqs',
                             endpoint_url='https://sqs.us-east-2.amazonaws.com/762907089775/job_ids',

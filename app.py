@@ -1,19 +1,36 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_bootstrap import Bootstrap5, Bootstrap4
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import SubmitField, StringField, PasswordField, IntegerRangeField, SelectField, IntegerField, HiddenField
-from wtforms.validators import DataRequired, length
+from wtforms.validators import DataRequired, Email, length
 import pandas as pd
 from scraper import *
 from db import *
+from flask_login import LoginManager, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_dance.contrib.google import make_google_blueprint, google
 
+login_manager = LoginManager()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
 app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'cosmo'
 
+blueprint = make_google_blueprint(
+    client_id= os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
+    client_secret= os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
+    # reprompt_consent=True,
+    #offline=True,
+    scope=["profile", "email"]
+)
+app.register_blueprint(blueprint, url_prefix="/login")
+
+
 bootstrap = Bootstrap5(app)
 formData = {}
+
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 # WTForm class
 
@@ -59,6 +76,25 @@ def index():
     return render_template("index.html", job_list=jobs)
 
 
+@app.route('/welcome')
+def welcome():
+    resp = google.get("/oauth2/v2/userinfo")
+    assert resp.ok, resp.text
+    email=resp.json()["email"]
+
+    return render_template("welcome.html",email=email)
+
+@app.route('/login/google')
+def login():
+    if not google.authorized:
+        return render_template(url_for('google.login'))
+    resp = google.get("/oauth2/v2/userinfo")
+    assert resp.ok, resp.text
+    email=resp.json()["email"]
+
+    return render_template('welcome.html', email=email)
+
+
 @app.route('/results', methods=["POST", "GET"])
 def results():
 
@@ -86,10 +122,15 @@ def about():
     return render_template("about.html")
 
 
+# Dynamic Route
+@app.route('/user/<name>')
+def user(name):
+    return f"<h1> This is a page for {name[10]} </h1>"
+
 # def data():
 #    return render_template('data_engineer_San_Jose,_California,_United_States.html')
 if __name__ == '__main__':
-    port = input("Which port do you want to run on?  ")
-    if not port.isdigit() or not isinstance(port, int):
-        port=5000
-    app.run(host='0.0.0.0', port=port, debug=True)
+    #port = input("Which port do you want to run on?  ")
+    #if not port.isdigit() or not isinstance(port, int):
+    #    port=5000
+    app.run(host='0.0.0.0', port=5000, debug=True)
