@@ -10,7 +10,7 @@ from db import *
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_dance.contrib.google import make_google_blueprint, google
 
-login_manager = LoginManager()
+#login_manager = LoginManager()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
