@@ -33,8 +33,6 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # WTForm class
-
-
 class SearchForm(FlaskForm):
     in_jobtitle = StringField('Job Title',
                               validators=[DataRequired(), length(min=3)],
@@ -78,7 +76,7 @@ def index():
     # return render_template("index.html", tables=[df_jobs.to_html(classes='card')], titles=df_jobs.columns.values)
     return render_template("index.html", job_list=jobs)
 
-
+'''
 @app.route('/welcome')
 def welcome():
     resp = google.get("/oauth2/v2/userinfo")
@@ -96,7 +94,7 @@ def login():
     email=resp.json()["email"]
 
     return render_template('welcome.html', email=email)
-
+'''
 
 @app.route('/results', methods=["POST", "GET"])
 def results():
