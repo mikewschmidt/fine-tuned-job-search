@@ -29,8 +29,8 @@ app.register_blueprint(blueprint, url_prefix="/login")
 bootstrap = Bootstrap5(app)
 formData = {}
 
-login_manager.init_app(app)
-login_manager.login_view = 'login'
+#login_manager.init_app(app)
+#login_manager.login_view = 'login'
 
 # WTForm class
 class SearchForm(FlaskForm):
