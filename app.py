@@ -9,12 +9,17 @@ from db import *
 #from flask_login import LoginManager, UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_dance.contrib.google import make_google_blueprint, google
+from dotenv import load_dotenv
+
+# Loading environment variables from .env
+load_dotenv()
 
 #login_manager = LoginManager()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
 app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'cosmo'
+
 
 blueprint = make_google_blueprint(
     client_id= os.environ.get('GOOGLE_OAUTH_CLIENT_ID'),
