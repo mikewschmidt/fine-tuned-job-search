@@ -17,7 +17,7 @@ load_dotenv()
 #login_manager = LoginManager()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ['FLASK_SECRET_KEY']
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY',os.urandom(32).hex())
 app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = 'cosmo'
 
 
