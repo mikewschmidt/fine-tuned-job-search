@@ -26,7 +26,8 @@ blueprint = make_google_blueprint(
     client_secret= os.environ.get('GOOGLE_OAUTH_CLIENT_SECRET'),
     # reprompt_consent=True,
     #offline=True,
-    scope=["profile", "email"]
+    #scope=["profile", "email"]
+    scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
 )
 app.register_blueprint(blueprint, url_prefix="/login")
 
