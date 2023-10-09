@@ -27,7 +27,7 @@ blueprint = make_google_blueprint(
     # reprompt_consent=True,
     #offline=True,
     #scope=["profile", "email"]
-    scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+    scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"]
 )
 app.register_blueprint(blueprint, url_prefix="/login")
 
