@@ -133,7 +133,7 @@ def get_job_ids(title, location, job_count):
 def get_all_job_ids(title, location):
     all_job_ids = []
     job_count = 0
-    max_jobs_to_scrape = 200
+    max_jobs_to_scrape = 100
     # I can't get a job_count for the search query,
     # so going to scrape till it can NOT find any more job ids
     # or I'm going to scrape upto 300 jobs or 12 pages
